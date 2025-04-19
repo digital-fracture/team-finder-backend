@@ -1,0 +1,68 @@
+auth: login:password -> jwt (ttl 7d) (key: access_token)
+    200 -> ok
+    401 -> wrong creds
+    403 (on endpoints with auth) -> forbidden
+
+feed/new (get):
+    return feed_id
+    body:
+{
+    university: str, // dropdown
+    skills: [
+        {
+            name: str,
+            level: int | null
+        }
+    ]
+}
+    // caching, cleanup after 1d
+feed (post):
+    query: feed_id, limit, offset
+
+
+// telemetry on/off + add field for photo id + tg
+user: post, get (auth), patch, delete
+user/{id}/profile: post, get, patch, delete  // salary?
+
+// store order
+user/favourites/user,
+user/favourites/team:
+    put, delete
+.../clear:
+    delete
+
+user/history/user,
+user/history/team:
+    put, delete
+.../clear:
+    delete
+
+user/telemetry
+    put: union of shit
+
+team: // with owner
+    post -> create
+    patch -> update
+    delete
+team/{id}/profile:
+    post, get, patch, delete
+team/{id}/member:
+    post -> join  // for owners
+    delete -> kick (or leave, depending on authed user)
+team/{id}/request:  // from users
+    post (user auth) -> create
+    delete (user/owner auth) -> revoke/reject
+    get (owner auth) -> get all
+team/{id}/invite:  // from teams
+    post (owner auth) -> create
+    delete (user/owner auth) -> reject/revoke
+    get (user auth) -> get all
+
+
+profile:
+    - name
+    - description
+    - university
+    - (team): event
+    - (team): owner
+    - (team): members
