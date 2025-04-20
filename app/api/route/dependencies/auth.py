@@ -14,7 +14,7 @@ from .database import DatabaseSession
 
 
 class LoginSchema(BaseModel):
-    emai: str
+    email: str
     password: str
 
 

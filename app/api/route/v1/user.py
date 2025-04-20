@@ -2,6 +2,7 @@ from typing import Annotated
 
 import aiobcrypt
 from fastapi import APIRouter, Body, HTTPException, status
+from sqlalchemy.exc import IntegrityError
 from sqlmodel import select
 
 from app.model import User, UserCreate, UserReadFull
@@ -58,7 +59,11 @@ async def create_user(user_create: Annotated[UserCreate, Body(embed=True)], sess
     user = User.model_validate(user_create, update=extra_data)
 
     session.add(user)
-    await session.flush()
+    try:
+        await session.flush()
+    except IntegrityError as e:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="User with this email already exists") from e
+
     await session.refresh(user)
 
     return user
