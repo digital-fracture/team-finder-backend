@@ -2,8 +2,17 @@ from typing import TYPE_CHECKING
 
 from sqlmodel import Field, Relationship, SQLModel
 
+from .team_invite import TeamInviteLink
+from .team_profile import TeamProfile, TeamProfileReadBare
+from .team_request import TeamRequestLink
+
 if TYPE_CHECKING:
-    from app.model.user import User, UserReadBare
+    from .user import User, UserReadWithProfile
+
+
+class TeamMemberLink(SQLModel, table=True):
+    team_id: int = Field(foreign_key="team.id", primary_key=True)
+    user_id: int = Field(foreign_key="user.id", primary_key=True)
 
 
 class _TeamIdsTable(SQLModel):
@@ -11,20 +20,19 @@ class _TeamIdsTable(SQLModel):
     owner_id: int = Field(foreign_key="user.id", index=True)
 
 
-class _TeamIdsRead(SQLModel):
-    id: int
-
-
 class _TeamBase(SQLModel):
     name: str
-    description: str = Field(default="")
-    university: str | None = Field(default=None)
-    event: str | None = Field(default=None)
 
 
 class Team(_TeamBase, _TeamIdsTable, table=True):
+    __tablename__ = "team"
+
     owner: "User" = Relationship()
-    # members: list["User"] = Relationship()  # TODO
+    members: list["User"] = Relationship(back_populates="teams", link_model=TeamMemberLink)
+    profile: TeamProfile | None = Relationship(back_populates="team")
+
+    invites: list["User"] = Relationship(back_populates="invites", link_model=TeamInviteLink)
+    requests: list["User"] = Relationship(back_populates="requests", link_model=TeamRequestLink)
 
 
 class TeamCreate(_TeamBase):
@@ -32,16 +40,26 @@ class TeamCreate(_TeamBase):
 
 
 class TeamUpdate(SQLModel):
-    name: str | None = Field(default=None)
-    description: str | None = Field(default=None)
-    university: str | None = Field(default=None)
-    event: str | None = Field(default=None)
+    name: str | None = None
 
 
-class TeamReadBare(_TeamBase, _TeamIdsRead):
+class TeamReadId(SQLModel):
+    id: int
+
+
+class TeamReadBare(_TeamBase, TeamReadId):
     pass
 
 
-class TeamRead(TeamReadBare):
-    owner: "UserReadBare"
-    members: list["UserReadBare"]
+class TeamReadWithProfile(TeamReadBare):
+    profile: TeamProfileReadBare | None = None
+
+
+class TeamReadWithUsers(TeamReadBare):
+    owner: "UserReadWithProfile"
+    members: list["UserReadWithProfile"] = []
+
+
+class TeamReadFull(TeamReadWithUsers, TeamReadWithProfile):
+    invites: list["UserReadWithProfile"] = []
+    requests: list["UserReadWithProfile"] = []

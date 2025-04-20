@@ -3,7 +3,8 @@ auth: login:password -> jwt (ttl 7d) (key: access_token)
     401 -> wrong creds
     403 (on endpoints with auth) -> forbidden
 
-feed/new (get):
+feed/user/new,
+feed/team/new (get):
     return feed_id
     body:
 {
@@ -16,7 +17,8 @@ feed/new (get):
     ]
 }
     // caching, cleanup after 1d
-feed (post):
+feed/user,
+feed/team (get):
     query: feed_id, limit, offset
 
 
@@ -27,13 +29,13 @@ user/{id}/profile: post, get, patch, delete  // salary?
 // store order
 user/favourites/user,
 user/favourites/team:
-    put, delete
+    put, delete, get (all)
 .../clear:
     delete
 
 user/history/user,
 user/history/team:
-    put, delete
+    put, delete, get (all)
 .../clear:
     delete
 
@@ -42,6 +44,7 @@ user/telemetry
 
 team: // with owner
     post -> create
+    get
     patch -> update
     delete
 team/{id}/profile:

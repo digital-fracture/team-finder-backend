@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 from sqlmodel import Field, Relationship, SQLModel
 
 if TYPE_CHECKING:
-    from app.model.user import User
+    from .user import User
 
 
 def _current_time_factory() -> datetime:

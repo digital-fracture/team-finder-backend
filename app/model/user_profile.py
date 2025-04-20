@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING
 from sqlmodel import Field, Relationship, SQLModel
 
 if TYPE_CHECKING:
-    from app.model.user import User, UserReadBare
+    from .user import User, UserReadBare
 
 
 class _UserProfileIdTable(SQLModel):
@@ -15,7 +15,6 @@ class _UserProfileIdRead(SQLModel):
 
 
 class _UserProfileBase(SQLModel):
-    name: str
     description: str = Field(default="")
     university: str | None = Field(default=None)
 
@@ -31,7 +30,6 @@ class UserProfileCreate(_UserProfileBase):
 
 
 class UserProfileUpdate(SQLModel):
-    name: str | None = None
     description: str | None = None
     university: str | None = None
 
@@ -40,5 +38,5 @@ class UserProfileReadBare(_UserProfileBase, _UserProfileIdRead):
     pass
 
 
-class UserProfileRead(UserProfileReadBare):
+class UserProfileReadFull(UserProfileReadBare):
     user: "UserReadBare"

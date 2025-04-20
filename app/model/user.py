@@ -1,5 +1,8 @@
 from sqlmodel import Field, Relationship, SQLModel
 
+from .team import Team, TeamMemberLink, TeamReadId
+from .team_invite import TeamInviteLink
+from .team_request import TeamRequestLink
 from .user_profile import UserProfile, UserProfileReadBare
 from .user_skill import UserSkill, UserSkillRead
 
@@ -26,8 +29,6 @@ class _UserIdRead(SQLModel):
 
 class _UserBase(SQLModel):
     username: str = Field(index=True)
-    description: str
-    photo_url: str | None = Field(default=None)
 
     telegram_username: str | None = Field(default=None)
 
@@ -42,6 +43,10 @@ class User(_UserBase, _UserPasswordHash, _UserEmail, _UserIdTable, table=True):
 
     skills: list[UserSkill] = Relationship(back_populates="user")
     profile: UserProfile | None = Relationship(back_populates="user")
+    teams: list[Team] = Relationship(back_populates="members", link_model=TeamMemberLink)
+
+    invites: list[Team] = Relationship(back_populates="invites", link_model=TeamInviteLink)
+    requests: list[Team] = Relationship(back_populates="requests", link_model=TeamRequestLink)
 
 
 class UserCreate(_UserBase, _UserRawPassword, _UserEmail, _UserIdTable):
@@ -49,8 +54,8 @@ class UserCreate(_UserBase, _UserRawPassword, _UserEmail, _UserIdTable):
 
 
 class UserUpdate(SQLModel):
+    username: str | None = None
     description: str | None = None
-    photo_url: str | None = None
     telegram_username: str | None = None
     is_premium: bool | None = None
     collect_telemetry: bool | None = None
@@ -60,5 +65,14 @@ class UserReadBare(_UserBase, _UserEmail, _UserIdRead):
     skills: list[UserSkillRead] = []
 
 
-class UserRead(UserReadBare):
+class UserReadWithProfile(UserReadBare):
     profile: UserProfileReadBare | None = None
+
+
+class UserReadWithTeams(UserReadBare):
+    teams: list[TeamReadId] = []
+
+
+class UserReadFull(UserReadWithTeams, UserReadWithProfile):
+    invites: list[TeamReadId] = []
+    requests: list[TeamReadId] = []
