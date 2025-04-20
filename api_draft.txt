@@ -22,25 +22,30 @@ feed/team (get):
     query: feed_id, limit, offset
 
 
+skills:
+    get list of all skills
+
+
 // telemetry on/off + add field for photo id + tg
 user: post, get (auth), patch, delete
+user/{id}/skill: post, get (all), patch /{id}, delete /{id}
 user/{id}/profile: post, get, patch, delete  // salary?
 
-// store order
+
 user/favourites/user,
 user/favourites/team:
-    put, delete, get (all)
+    post, delete, get (all)
 .../clear:
     delete
 
 user/history/user,
 user/history/team:
-    put, delete, get (all)
+    post, delete, get (all)
 .../clear:
     delete
 
 user/telemetry
-    put: union of shit
+    post: union of shit
 
 team: // with owner
     post -> create
@@ -52,14 +57,14 @@ team/{id}/profile:
 team/{id}/member:
     post -> join  // for owners
     delete -> kick (or leave, depending on authed user)
-team/{id}/request:  // from users
+
+team/{id}/user/{id}/request:  // from users
     post (user auth) -> create
     delete (user/owner auth) -> revoke/reject
-    get (owner auth) -> get all
-team/{id}/invite:  // from teams
+team/{id}/user/{id}/invite:  // from teams
     post (owner auth) -> create
     delete (user/owner auth) -> reject/revoke
-    get (user auth) -> get all
+(both viewable from users and teams)
 
 
 profile:

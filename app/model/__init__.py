@@ -1,7 +1,11 @@
 __all__ = [
     "Team",
     "TeamCreate",
-    "TeamReadWithUsers",
+    "TeamProfile",
+    "TeamProfileCreate",
+    "TeamProfileReadFull",
+    "TeamProfileUpdate",
+    "TeamReadFull",
     "TeamUpdate",
     "User",
     "UserCreate",
@@ -9,7 +13,7 @@ __all__ = [
     "UserProfileCreate",
     "UserProfileReadFull",
     "UserProfileUpdate",
-    "UserReadWithTeams",
+    "UserReadFull",
     "UserSkill",
     "UserSkillCreate",
     "UserSkillRead",
@@ -17,8 +21,14 @@ __all__ = [
     "UserUpdate",
 ]
 
-from .team import Team, TeamCreate, TeamReadWithUsers, TeamUpdate
-from .user import User, UserCreate, UserReadWithTeams, UserUpdate
+from .team import Team, TeamCreate, TeamReadFull, TeamUpdate
+from .team_profile import (
+    TeamProfile,
+    TeamProfileCreate,
+    TeamProfileReadFull,
+    TeamProfileUpdate,
+)
+from .user import User, UserCreate, UserReadFull, UserUpdate
 from .user_profile import (
     UserProfile,
     UserProfileCreate,

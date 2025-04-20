@@ -1,5 +1,7 @@
 from sqlmodel import Field, Relationship, SQLModel
 
+from .favourite import FavouriteTeamLink, FavouriteUserLink
+from .history import HistoryTeamLink, HistoryUserLink
 from .team import Team, TeamMemberLink, TeamReadId
 from .team_invite import TeamInviteLink
 from .team_request import TeamRequestLink
@@ -41,12 +43,46 @@ class User(_UserBase, _UserPasswordHash, _UserEmail, _UserIdTable, table=True):
 
     average_skill_level: float = Field(default=0)  # just for search sorting
 
-    skills: list[UserSkill] = Relationship(back_populates="user")
-    profile: UserProfile | None = Relationship(back_populates="user")
-    teams: list[Team] = Relationship(back_populates="members", link_model=TeamMemberLink)
+    skills: list[UserSkill] = Relationship(
+        back_populates="user", sa_relationship_kwargs={"lazy": "selectin"}
+    )
+    profile: UserProfile | None = Relationship(
+        back_populates="user", sa_relationship_kwargs={"lazy": "selectin"}
+    )
+    teams: list[Team] = Relationship(
+        back_populates="members",
+        link_model=TeamMemberLink,
+        sa_relationship_kwargs={"lazy": "selectin"},
+    )
 
-    invites: list[Team] = Relationship(back_populates="invites", link_model=TeamInviteLink)
-    requests: list[Team] = Relationship(back_populates="requests", link_model=TeamRequestLink)
+    invites: list[Team] = Relationship(
+        back_populates="invites",
+        link_model=TeamInviteLink,
+        sa_relationship_kwargs={"lazy": "selectin"},
+    )
+    requests: list[Team] = Relationship(
+        back_populates="requests",
+        link_model=TeamRequestLink,
+        sa_relationship_kwargs={"lazy": "selectin"},
+    )
+
+    favourite_users: list["User"] = Relationship(
+        link_model=FavouriteUserLink,
+        sa_relationship_kwargs={
+            "primaryjoin": id == FavouriteUserLink.user_id,
+            "secondaryjoin": id == FavouriteUserLink.favourite_id,
+        },
+    )
+    favourite_teams: list[Team] = Relationship(link_model=FavouriteTeamLink)
+
+    history_users: list["User"] = Relationship(
+        link_model=HistoryUserLink,
+        sa_relationship_kwargs={
+            "primaryjoin": id == HistoryUserLink.user_id,
+            "secondaryjoin": id == HistoryUserLink.viewed_id,
+        },
+    )
+    history_teams: list[Team] = Relationship(link_model=HistoryTeamLink)
 
 
 class UserCreate(_UserBase, _UserRawPassword, _UserEmail, _UserIdTable):

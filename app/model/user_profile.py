@@ -7,7 +7,7 @@ if TYPE_CHECKING:
 
 
 class _UserProfileIdTable(SQLModel):
-    user_id: int = Field(foreign_key="user.id", primary_key=True)
+    user_id: int = Field(foreign_key="user.id", ondelete="CASCADE", primary_key=True)
 
 
 class _UserProfileIdRead(SQLModel):
@@ -22,7 +22,9 @@ class _UserProfileBase(SQLModel):
 class UserProfile(_UserProfileBase, _UserProfileIdTable, table=True):
     __tablename__ = "user_profile"
 
-    user: "User" = Relationship(back_populates="profile")
+    user: "User" = Relationship(
+        back_populates="profile", sa_relationship_kwargs={"lazy": "selectin"}
+    )
 
 
 class UserProfileCreate(_UserProfileBase):

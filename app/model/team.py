@@ -11,13 +11,15 @@ if TYPE_CHECKING:
 
 
 class TeamMemberLink(SQLModel, table=True):
-    team_id: int = Field(foreign_key="team.id", primary_key=True)
-    user_id: int = Field(foreign_key="user.id", primary_key=True)
+    __tablename__ = "_link_team_member"
+
+    team_id: int = Field(foreign_key="team.id", ondelete="CASCADE", primary_key=True)
+    user_id: int = Field(foreign_key="user.id", ondelete="CASCADE", primary_key=True)
 
 
 class _TeamIdsTable(SQLModel):
     id: int | None = Field(default=None, primary_key=True)
-    owner_id: int = Field(foreign_key="user.id", index=True)
+    owner_id: int = Field(foreign_key="user.id", ondelete="CASCADE", index=True)
 
 
 class _TeamBase(SQLModel):
@@ -27,12 +29,26 @@ class _TeamBase(SQLModel):
 class Team(_TeamBase, _TeamIdsTable, table=True):
     __tablename__ = "team"
 
-    owner: "User" = Relationship()
-    members: list["User"] = Relationship(back_populates="teams", link_model=TeamMemberLink)
-    profile: TeamProfile | None = Relationship(back_populates="team")
+    owner: "User" = Relationship(sa_relationship_kwargs={"lazy": "selectin"})
+    members: list["User"] = Relationship(
+        back_populates="teams",
+        link_model=TeamMemberLink,
+        sa_relationship_kwargs={"lazy": "selectin"},
+    )
+    profile: TeamProfile | None = Relationship(
+        back_populates="team", sa_relationship_kwargs={"lazy": "selectin"}
+    )
 
-    invites: list["User"] = Relationship(back_populates="invites", link_model=TeamInviteLink)
-    requests: list["User"] = Relationship(back_populates="requests", link_model=TeamRequestLink)
+    invites: list["User"] = Relationship(
+        back_populates="invites",
+        link_model=TeamInviteLink,
+        sa_relationship_kwargs={"lazy": "selectin"},
+    )
+    requests: list["User"] = Relationship(
+        back_populates="requests",
+        link_model=TeamRequestLink,
+        sa_relationship_kwargs={"lazy": "selectin"},
+    )
 
 
 class TeamCreate(_TeamBase):

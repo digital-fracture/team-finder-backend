@@ -19,9 +19,13 @@ class SkillLevel(IntEnum):
     ADVANCED = 3
 
 
-class _UserSkillIds(SQLModel):
+class _UserSkillIdsTable(SQLModel):
     id: int | None = Field(default=None, primary_key=True)
-    user_id: int = Field(foreign_key="user.id", index=True)
+    user_id: int = Field(foreign_key="user.id", ondelete="CASCADE", index=True)
+
+
+class _UserSkillIdsRead(SQLModel):
+    id: int
 
 
 class _UserSkillBase(SQLModel):
@@ -30,10 +34,12 @@ class _UserSkillBase(SQLModel):
     confirmed_at: datetime = Field(default_factory=_current_time_factory)
 
 
-class UserSkill(_UserSkillBase, _UserSkillIds, table=True):
+class UserSkill(_UserSkillBase, _UserSkillIdsTable, table=True):
     __tablename__ = "user_skill"
 
-    user: "User" = Relationship(back_populates="skills")
+    user: "User" = Relationship(
+        back_populates="skills", sa_relationship_kwargs={"lazy": "selectin"}
+    )
 
 
 class UserSkillCreate(_UserSkillBase):
@@ -45,5 +51,5 @@ class UserSkillUpdate(SQLModel):
     confirmed_at: datetime = Field(default_factory=_current_time_factory)
 
 
-class UserSkillRead(_UserSkillBase):
+class UserSkillRead(_UserSkillBase, _UserSkillIdsRead):
     pass

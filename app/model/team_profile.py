@@ -7,7 +7,7 @@ if TYPE_CHECKING:
 
 
 class _TeamProfileIdTable(SQLModel):
-    team_id: int = Field(foreign_key="team.id", primary_key=True)
+    team_id: int = Field(foreign_key="team.id", ondelete="CASCADE", primary_key=True)
 
 
 class _TeamProfileIdRead(SQLModel):
@@ -23,7 +23,9 @@ class _TeamProfileBase(SQLModel):
 class TeamProfile(_TeamProfileBase, _TeamProfileIdTable, table=True):
     __tablename__ = "team_profile"
 
-    team: "Team" = Relationship(back_populates="profile")
+    team: "Team" = Relationship(
+        back_populates="profile", sa_relationship_kwargs={"lazy": "selectin"}
+    )
 
 
 class TeamProfileCreate(_TeamProfileBase):
