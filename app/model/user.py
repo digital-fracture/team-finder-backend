@@ -69,8 +69,8 @@ class User(_UserBase, _UserPasswordHash, _UserEmail, _UserIdTable, table=True):
     favourite_users: list["User"] = Relationship(
         link_model=FavouriteUserLink,
         sa_relationship_kwargs={
-            "primaryjoin": id == FavouriteUserLink.user_id,
-            "secondaryjoin": id == FavouriteUserLink.favourite_id,
+            "primaryjoin": "User.id == FavouriteUserLink.user_id",
+            "secondaryjoin": "User.id == FavouriteUserLink.favourite_id",
         },
     )
     favourite_teams: list[Team] = Relationship(link_model=FavouriteTeamLink)
@@ -78,8 +78,8 @@ class User(_UserBase, _UserPasswordHash, _UserEmail, _UserIdTable, table=True):
     history_users: list["User"] = Relationship(
         link_model=HistoryUserLink,
         sa_relationship_kwargs={
-            "primaryjoin": id == HistoryUserLink.user_id,
-            "secondaryjoin": id == HistoryUserLink.viewed_id,
+            "primaryjoin": "User.id == HistoryUserLink.user_id",
+            "secondaryjoin": "User.id == HistoryUserLink.viewed_id",
         },
     )
     history_teams: list[Team] = Relationship(link_model=HistoryTeamLink)
