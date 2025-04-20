@@ -1,13 +1,14 @@
 from typing import Annotated
 
 import aiobcrypt
-from fastapi import APIRouter, Body, HTTPException, status
+from fastapi import APIRouter, Body, status
 from sqlalchemy.exc import IntegrityError
 from sqlmodel import select
 
 from app.model import User, UserCreate, UserReadFull
 
 from ..dependencies import AuthUser, DatabaseSession
+from ..errors import http_exceptions, models, responses_presets
 
 user_router = APIRouter(tags=["user"])
 
@@ -16,11 +17,7 @@ user_router = APIRouter(tags=["user"])
     "/user",
     response_model=UserReadFull,
     status_code=status.HTTP_200_OK,
-    responses={
-        status.HTTP_400_BAD_REQUEST: {"detail": "Invalid token"},
-        status.HTTP_401_UNAUTHORIZED: {"detail": "Session expired"},
-        status.HTTP_404_NOT_FOUND: {"detail": "User not found"},
-    },
+    responses=responses_presets.token_auth,
 )
 async def get_user(user: AuthUser) -> ...:
     return user
@@ -31,7 +28,7 @@ async def get_user(user: AuthUser) -> ...:
     response_model=UserReadFull,
     status_code=status.HTTP_200_OK,
     responses={
-        status.HTTP_404_NOT_FOUND: {"detail": "User not found"},
+        status.HTTP_404_NOT_FOUND: models.user_not_found_response,
     },
 )
 async def get_user_by_id(user_id: int, session: DatabaseSession) -> ...:
@@ -39,7 +36,7 @@ async def get_user_by_id(user_id: int, session: DatabaseSession) -> ...:
     user: User | None = (await session.exec(statement)).one_or_none()
 
     if not user:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+        raise http_exceptions.user_not_found
 
     return user
 
@@ -49,7 +46,7 @@ async def get_user_by_id(user_id: int, session: DatabaseSession) -> ...:
     response_model=UserReadFull,
     status_code=status.HTTP_201_CREATED,
     responses={
-        status.HTTP_409_CONFLICT: {"detail": "User with this email already exists"},
+        status.HTTP_409_CONFLICT: models.user_email_conflict_response,
     },
 )
 async def create_user(user_create: Annotated[UserCreate, Body(embed=True)], session: DatabaseSession) -> ...:
@@ -62,7 +59,7 @@ async def create_user(user_create: Annotated[UserCreate, Body(embed=True)], sess
     try:
         await session.flush()
     except IntegrityError as e:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="User with this email already exists") from e
+        raise http_exceptions.user_email_conflict from e
 
     await session.refresh(user)
 
@@ -73,11 +70,7 @@ async def create_user(user_create: Annotated[UserCreate, Body(embed=True)], sess
     "/user",
     response_model=UserReadFull,
     status_code=status.HTTP_200_OK,
-    responses={
-        status.HTTP_400_BAD_REQUEST: {"detail": "Invalid token"},
-        status.HTTP_401_UNAUTHORIZED: {"detail": "Session expired"},
-        status.HTTP_404_NOT_FOUND: {"detail": "User not found"},
-    },
+    responses=responses_presets.token_auth,
 )
 async def update_user(
         user: AuthUser, user_update: Annotated[UserCreate, Body(embed=True)], session: DatabaseSession
@@ -95,11 +88,7 @@ async def update_user(
     "/user",
     response_model=None,
     status_code=status.HTTP_204_NO_CONTENT,
-    responses={
-        status.HTTP_400_BAD_REQUEST: {"detail": "Invalid token"},
-        status.HTTP_401_UNAUTHORIZED: {"detail": "Session expired"},
-        status.HTTP_404_NOT_FOUND: {"detail": "User not found"},
-    },
+    responses=responses_presets.token_auth,
 )
 async def delete_user(user: AuthUser, session: DatabaseSession) -> ...:
     session.delete(user)
