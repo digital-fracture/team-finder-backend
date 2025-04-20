@@ -27,7 +27,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth")
 
 
 async def login_for_access_token(
-    login: Annotated[LoginSchema, Body(embed=True)], session: DatabaseSession
+    login: Annotated[LoginSchema, Body(embed=False)], session: DatabaseSession
 ) -> TokenSchema:
     statement = select(User).where(User.email == login.email)
     user: User | None = (await session.exec(statement)).one_or_none()

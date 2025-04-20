@@ -49,7 +49,7 @@ async def get_user_by_id(user_id: int, session: DatabaseSession) -> ...:
         status.HTTP_409_CONFLICT: models.user_email_conflict_response,
     },
 )
-async def create_user(user_create: Annotated[UserCreate, Body(embed=True)], session: DatabaseSession) -> ...:
+async def create_user(user_create: Annotated[UserCreate, Body(embed=False)], session: DatabaseSession) -> ...:
     hashed_password = (await aiobcrypt.hashpw(user_create.password.encode(), await aiobcrypt.gensalt())).decode()
     extra_data = {"hashed_password": hashed_password}
 
@@ -73,7 +73,7 @@ async def create_user(user_create: Annotated[UserCreate, Body(embed=True)], sess
     responses=responses_presets.token_auth,
 )
 async def update_user(
-        user: AuthUser, user_update: Annotated[UserCreate, Body(embed=True)], session: DatabaseSession
+        user: AuthUser, user_update: Annotated[UserCreate, Body(embed=False)], session: DatabaseSession
 ) -> ...:
     user.sqlmodel_update(user_update.model_dump(exclude_unset=True))
 
