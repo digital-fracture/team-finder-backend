@@ -85,7 +85,7 @@ class User(_UserBase, _UserPasswordHash, _UserEmail, _UserIdTable, table=True):
     history_teams: list[Team] = Relationship(link_model=HistoryTeamLink)
 
 
-class UserCreate(_UserBase, _UserRawPassword, _UserEmail, _UserIdTable):
+class UserCreate(_UserBase, _UserRawPassword, _UserEmail):
     pass
 
 
