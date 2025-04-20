@@ -16,10 +16,10 @@ services:
       - ./certs:/certs:ro
       - ./traefik.yml:/traefik/dynamic.yml:ro
     networks:
-      - look-network
+      - team-finder-network
     restart: always
 
-  look-backend:
+  team-finder-backend:
     build:
       context: ../
       dockerfile: deploy/Dockerfile
@@ -28,16 +28,18 @@ services:
     scale: 2
     labels:
       - traefik.enable=true
-      - traefik.http.routers.look-backend.rule=Host(`${API_HOST}`)
-      - traefik.http.routers.look-backend.entryPoints=websecure
+      - traefik.http.routers.team-finder-backend.rule=Host(`${API_HOST}`)
+      - traefik.http.routers.team-finder-backend.entryPoints=websecure
     depends_on:
-      look-database:
+      team-finder-database:
         condition: service_healthy
+    volumes:
+      - ../keys:/app/keys
     networks:
-      - look-network
+      - team-finder-network
     restart: always
 
-  look-database:
+  team-finder-database:
     image: postgres:16-alpine
     container_name: ${POSTGRES_HOST}
     environment:
@@ -51,13 +53,13 @@ services:
       retries: 5
       start_period: 5s
     volumes:
-      - look-database:/var/lib/postgresql/data
+      - team-finder-database:/var/lib/postgresql/data
     networks:
-      - look-network
+      - team-finder-network
     restart: always
 
 volumes:
-  look-database:
+  team-finder-database:
 
 networks:
-  look-network:
+  team-finder-network:

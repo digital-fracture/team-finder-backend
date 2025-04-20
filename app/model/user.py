@@ -14,7 +14,7 @@ class _UserIdTable(SQLModel):
 
 
 class _UserEmail(SQLModel):
-    email: str = Field(index=True)
+    email: str = Field(unique=True, index=True)
 
 
 class _UserPasswordHash(SQLModel):

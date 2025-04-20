@@ -1,5 +1,8 @@
 import os
+from pathlib import Path
 
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.asymmetric.rsa import RSAPrivateKey, RSAPublicKey
 from sqlalchemy import URL
 
 POSTGRES_URL = URL.create(
@@ -9,6 +12,13 @@ POSTGRES_URL = URL.create(
     host=os.getenv("POSTGRES_HOST"),
     port=os.getenv("POSTGRES_PORT"),
     database=os.getenv("POSTGRES_DB"),
+)
+
+PRIVATE_KEY: RSAPrivateKey = serialization.load_ssh_private_key(
+    data=Path("keys/id_rsa").read_bytes(), password=None
+)
+PUBLIC_KEY: RSAPublicKey = serialization.load_ssh_public_key(
+    data=Path("keys/id_rsa.pub").read_bytes()
 )
 
 LOGFIRE_SERVICE_NAME = os.getenv("LOGFIRE_SERVICE_NAME")

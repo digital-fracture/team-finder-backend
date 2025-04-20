@@ -1,4 +1,4 @@
-auth: login:password -> jwt (ttl 7d) (key: access_token)
+auth: email+password -> jwt (ttl 7d) (key: access_token)
     200 -> ok
     401 -> wrong creds
     403 (on endpoints with auth) -> forbidden
