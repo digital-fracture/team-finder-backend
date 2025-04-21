@@ -47,7 +47,7 @@ class UserSkillCreate(_UserSkillBase):
 
 
 class UserSkillUpdate(SQLModel):
-    level: SkillLevel
+    level: SkillLevel | None = Field(default=None)
     confirmed_at: datetime = Field(default_factory=_current_time_factory)
 
 
