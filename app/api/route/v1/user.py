@@ -5,7 +5,7 @@ from fastapi import APIRouter, Body, status
 from sqlalchemy.exc import IntegrityError
 from sqlmodel import select
 
-from app.model import User, UserCreate, UserReadFull
+from app.model import User, UserCreate, UserReadFull, UserUpdate
 
 from ..dependencies import AuthUser, DatabaseSession
 from ..errors import http_exceptions, models, responses_presets
@@ -27,9 +27,7 @@ async def get_user(user: AuthUser) -> ...:
     "/user/{user_id}",
     response_model=UserReadFull,
     status_code=status.HTTP_200_OK,
-    responses={
-        status.HTTP_404_NOT_FOUND: models.user_not_found_response,
-    },
+    responses={status.HTTP_404_NOT_FOUND: models.user_not_found_response},
 )
 async def get_user_by_id(user_id: int, session: DatabaseSession) -> ...:
     statement = select(User).where(User.id == user_id)
@@ -45,12 +43,14 @@ async def get_user_by_id(user_id: int, session: DatabaseSession) -> ...:
     "/user",
     response_model=UserReadFull,
     status_code=status.HTTP_201_CREATED,
-    responses={
-        status.HTTP_409_CONFLICT: models.user_email_conflict_response,
-    },
+    responses={status.HTTP_409_CONFLICT: models.user_email_conflict_response},
 )
-async def create_user(user_create: Annotated[UserCreate, Body(embed=False)], session: DatabaseSession) -> ...:
-    hashed_password = (await aiobcrypt.hashpw(user_create.password.encode(), await aiobcrypt.gensalt())).decode()
+async def create_user(
+    user_create: Annotated[UserCreate, Body(embed=False)], session: DatabaseSession
+) -> ...:
+    hashed_password = (
+        await aiobcrypt.hashpw(user_create.password.encode(), await aiobcrypt.gensalt())
+    ).decode()
     extra_data = {"hashed_password": hashed_password}
 
     user = User.model_validate(user_create, update=extra_data)
@@ -73,7 +73,9 @@ async def create_user(user_create: Annotated[UserCreate, Body(embed=False)], ses
     responses=responses_presets.token_auth,
 )
 async def update_user(
-        user: AuthUser, user_update: Annotated[UserCreate, Body(embed=False)], session: DatabaseSession
+    user: AuthUser,
+    user_update: Annotated[UserUpdate, Body(embed=False)],
+    session: DatabaseSession,
 ) -> ...:
     user.sqlmodel_update(user_update.model_dump(exclude_unset=True))
 

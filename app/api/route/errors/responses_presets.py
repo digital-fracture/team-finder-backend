@@ -1,6 +1,4 @@
-__all__ = [
-    "token_auth",
-]
+__all__ = ["token_auth"]
 
 from fastapi import status
 
